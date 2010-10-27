@@ -63,6 +63,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		TCHAR type = 0;
 		if (parameters.Lookup(TYPE_STRING, str_type))
 			type = str_type[0];
+
 		switch (type)
 		{
 		case RADMIN_NO_CH:

@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory=""
-				CommandArguments="wbr://type=0&amp;progname=radmin.exe&amp;ip=219.219.101.53&amp;username=123456&amp;password=123456"
+				CommandArguments="wbr://type=0&amp;progname=radmin.exe&amp;ip=219.216.101.53&amp;username=123456&amp;password=123456"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"
@@ -39,7 +39,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory=""
-				CommandArguments="wbr://type=3&amp;progname=teamviewer.exe&amp;id&amp;password=1234"
+				CommandArguments="wbr://type=0&amp;progname=radmin.exe&amp;ip=219.216.101.53&amp;username=123456&amp;password=123456"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

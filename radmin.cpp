@@ -86,7 +86,7 @@ bool radmin_login(CString cmd, CString ip, CString username, CString password, i
 		//MessageBox(0, TEXT("启动程序失败"), TEXT("启动程序失败"), MB_OK);
 		return false;
 	}
-	Sleep(1000);
+	//Sleep(1000);
 	HWND h_wnd = 0;
 	bool zh = true;
 
@@ -95,7 +95,10 @@ bool radmin_login(CString cmd, CString ip, CString username, CString password, i
 		//MessageBox(0, TEXT("连接超时"), TEXT("连接超时"), MB_OK);
 		return false;
 	}
-	Sleep(100);
+
+	while (!IsWindowVisible(h_wnd));
+	ShowWindow(h_wnd, SW_HIDE);
+
 	HWND h_child_username_edit = ::FindWindowEx(h_wnd, NULL, _T("Edit"), 0);
 	HWND h_child_password_edit = ::FindWindowEx(h_wnd, h_child_username_edit, _T("Edit"), 0);
 	if (!h_child_password_edit)
