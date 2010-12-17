@@ -9,18 +9,18 @@ bool mstsc_construct_command(const CMapStringToString &parameters, CString &cmd)
 	cmd.Empty();
 	if (parameters.Lookup(PROGNAME_STRING, progname))
 		cmd = progname;
-	else
-		return false;
-	if (parameters.Lookup(IP_STRING, ip) && ip.GetLength() > 0)
-	{
-		cmd += " /v:";
-		cmd += ip;
-		if (parameters.Lookup(PORT_STRING, port) && port.GetLength() > 0)
-		{
-			cmd += ":";
-			cmd += port;
-		}
-	}
+	//else
+	//	return false;
+	//if (parameters.Lookup(IP_STRING, ip) && ip.GetLength() > 0)
+	//{
+	//	cmd += " /v:";
+	//	cmd += ip;
+	//	if (parameters.Lookup(PORT_STRING, port) && port.GetLength() > 0)
+	//	{
+	//		cmd += ":";
+	//		cmd += port;
+	//	}
+	//}
 	return true;
 }
 
@@ -35,14 +35,43 @@ bool mstsc_resolve_connect_info( const CMapStringToString &parameters, CString &
 	return true;
 }
 
-bool mstsc_connect( CString cmd, CString ip, CString username, CString password)
+bool mstsc_connect( CString cmd, CString ip, CString username, CString password, int seconds)
 {
 	if (!create_process(cmd))
 	{
 		//MessageBox(0, TEXT("启动程序失败"), TEXT("启动程序失败"), MB_OK);
 		return false;
 	}
-	Sleep(1000);
+	//Sleep(500);
+
+	HWND h_main;
+	if (!mstsc_find_main_window(MSTSC_CONNECT_RETRY, h_main))
+		return false;
+
+	while (!IsWindowVisible(h_main));
+	//填入IP和密码
+	HWND h_option = FindWindowEx(h_main, NULL, _T("Button"), _T("选项(&O) >>"));
+	printf("%d------\n", h_option);
+	click_button(h_option);
+	Sleep(100);
+	//通过FindWindowEx一层一层地找到IP地址的输入控件
+	HWND h_dlg = FindWindowEx(h_main, NULL, _T("#32770"), _T(""));
+	HWND h_ipCbEx32 = FindWindowEx(h_dlg, NULL, _T("ComboBoxEx32"), NULL);
+	HWND h_ipCb = FindWindowEx(h_ipCbEx32, NULL, _T("ComboBox"), NULL);
+	HWND h_ipEdit = FindWindowEx(h_ipCb, NULL, _T("Edit"), NULL);
+	fill_text(h_ipEdit, ip);
+
+	HWND h_labelUsername = FindWindowEx(h_dlg, NULL, _T("Static"), _T("用户名(&U):"));
+	HWND h_editUsername = FindWindowEx(h_dlg, h_labelUsername, _T("Edit"), NULL);
+	HWND h_labelPwd = FindWindowEx(h_dlg, NULL, _T("Static"), _T("密码(&P):"));
+	HWND h_editPwd = FindWindowEx(h_dlg, h_labelPwd, _T("Edit"), NULL);
+	fill_text(h_editUsername, username);
+	fill_text(h_editPwd, password);
+
+	HWND h_btnConnect = FindWindowEx(h_main, NULL, _T("Button"), MSTSC_CONNECT_BTN_TITLE);
+	click_button(h_btnConnect);
+
+	//查找根据窗口来判断连接是否成功
 	HWND h_wnd;
 	int probe_result = mstsc_probe_result(ip, MSTSC_AUTHENTICATION_RETRY, h_wnd);
 	if (MSTSC_WARNING_WINDOW == probe_result)
@@ -61,26 +90,67 @@ bool mstsc_connect( CString cmd, CString ip, CString username, CString password)
 		probe_result = mstsc_probe_result(ip, MSTSC_AUTHENTICATION_RETRY, h_wnd);
 	}
 
-	if (MSTSC_NORMAL_WINDOW == probe_result)//正常登录
-	{
-		// 都只有一个子窗口，所以找到的唯一一个就是所需的子窗口
-		HWND h_sub1 = FindWindowEx(h_wnd, NULL, _T("TscShellAxHostClass"), NULL);
-		HWND h_sub2 = FindWindowEx(h_sub1, NULL, NULL, NULL);
-		HWND h_sub3 = FindWindowEx(h_sub2, NULL, _T("UIMainClass"), NULL);
-		HWND h_sub4 = FindWindowEx(h_sub3, NULL, _T("UIContainerClass"), NULL);
-		HWND h_input = FindWindowEx(h_sub4, NULL, _T("IHWindowClass"), NULL);
-		for (int i = 0; i < password.GetLength(); ++i) {
-			TCHAR ch = password.GetAt(i);
-			WPARAM wParam = ch;
-			LPARAM lParam = 1;
-			lParam += MapVirtualKey(ch, MAPVK_VK_TO_VSC) << 16;
-			::PostMessage(h_input, WM_KEYDOWN, wParam, lParam);
-			lParam += 1 << 30;
-			lParam += 1 << 31;
-			::PostMessage(h_input, WM_KEYDOWN, wParam, lParam);
+	if (MSTSC_NORMAL_WINDOW != probe_result)
+		return false;
+
+	return true;
+	//连接成功，输入密码，并登陆。键盘事件的模拟
+	//都只有一个子窗口，所以找到的唯一一个就是所需的子窗口
+	HWND h_sub1 = FindWindowEx(h_wnd, NULL, _T("TscShellAxHostClass"), NULL);
+	HWND h_sub2 = FindWindowEx(h_sub1, NULL, NULL, NULL);
+	HWND h_sub3 = FindWindowEx(h_sub2, NULL, _T("UIMainClass"), NULL);
+	HWND h_sub4 = FindWindowEx(h_sub3, NULL, _T("UIContainerClass"), NULL);
+	HWND h_input = FindWindowEx(h_sub4, NULL, _T("IHWindowClass"), NULL);
+	Sleep(1000);
+	while (!IsWindowVisible(h_wnd));
+	::ShowWindow(h_wnd, SW_RESTORE);  
+	::SetForegroundWindow(h_wnd);
+	for (int i = 0; i < password.GetLength(); ++i) {
+		TCHAR ch = password.GetAt(i);
+		SHORT comb = VkKeyScan(ch);
+		BYTE vk = comb & 0xFF;
+		bool shift = (comb & 0x0100) == 0x0100 ? true : false;
+		//char key_ch = ch;
+		if (shift) {
+			keybd_event(VK_SHIFT, MapVirtualKey(VK_SHIFT, MAPVK_VK_TO_VSC), 0, 0);
+		}
+		keybd_event(vk, MapVirtualKey(vk, MAPVK_VK_TO_VSC), 0, 0);
+		keybd_event(vk, MapVirtualKey(vk, MAPVK_VK_TO_VSC), KEYEVENTF_KEYUP, 0);
+		if (shift) {
+			keybd_event(VK_SHIFT, MapVirtualKey(VK_SHIFT, MAPVK_VK_TO_VSC), KEYEVENTF_KEYUP, 0);
 		}
 	}
+	keybd_event(VK_RETURN, MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC), 0, 0);
+	keybd_event(VK_RETURN, MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC), KEYEVENTF_KEYUP, 0);
 	return true;
+}
+
+bool mstsc_find_main_window( int seconds, HWND &h_main )
+{
+	bool found = false;
+	HWND wnd = 0;
+	mstsc_finding = true;
+	if (!wait_thread())
+	{
+		return false;
+	}
+	start_timer(MSTSC_TIMER_ID, seconds, mstsc_timer_proc);
+#ifdef _DEBUG
+	_tprintf(TEXT("wait for the main window\n"));
+#endif
+
+	while (mstsc_finding)
+	{
+		if ((found = find_window(MSTSC_REMOTE_TITLE, 1, wnd)))
+		{
+#ifdef _DEBUG
+			_tprintf(TEXT("main window found\n"));
+#endif
+			mstsc_finish_timer();
+		}
+	}
+	h_main = wnd;
+	return found;
 }
 
 int mstsc_probe_result( CString ip, int seconds, HWND &h_wnd )
@@ -89,7 +159,7 @@ int mstsc_probe_result( CString ip, int seconds, HWND &h_wnd )
 	int result = MSTSC_ERROR;
 	HWND wnd = 0;
 	mstsc_finding = true;
-	CString remote_title = ip + MSTSC_REMOTE_TITLE;
+	CString remote_title = ip + _T(" - ") + MSTSC_REMOTE_SUC_TITLE;
 	if (!wait_thread())
 	{
 		return result;
@@ -101,7 +171,23 @@ int mstsc_probe_result( CString ip, int seconds, HWND &h_wnd )
 
 	while (mstsc_finding)
 	{
-		if ((found = find_window(MSTSC_WARNING_TITLE, 1, wnd)))
+		if (NULL != (wnd = FindWindow(TEXT("TSSHELLWND"), remote_title)))
+		{
+			found = true;
+#ifdef _DEBUG
+			_tprintf(TEXT("remote window found\n"));
+#endif
+			result = MSTSC_NORMAL_WINDOW;
+			mstsc_finish_timer();
+		}
+		if (found == find_window(_T("中断远程桌面连接"), 1, wnd)) {
+#ifdef _DEBUG
+			_tprintf(TEXT("error window found\n"));
+#endif
+			result = MSTSC_ERROR;
+			mstsc_finish_timer();
+		}
+		if (!found && (found = find_window(MSTSC_WARNING_TITLE, 1, wnd)))
 		{
 			HWND h_label = 0;
 			if (NULL != (h_label = FindWindowEx(wnd, NULL, _T("Button"), _T("&Don't ask me again for connections to this computer")))) {
@@ -125,15 +211,6 @@ int mstsc_probe_result( CString ip, int seconds, HWND &h_wnd )
 					mstsc_finish_timer();
 			}
 		}
-		else if (NULL != (wnd = FindWindow(TEXT("TscShellContainerClass"), remote_title)))
-		{
-			found = true;
-#ifdef _DEBUG
-			_tprintf(TEXT("remote window found\n"));
-#endif
-			result = MSTSC_NORMAL_WINDOW;
-			mstsc_finish_timer();
-		}
 	}
 	h_wnd = wnd;
 	return result;
@@ -152,21 +229,3 @@ bool mstsc_finish_timer()
 	mstsc_finding = false;
 	return finish_timer(thread_id);
 }
-
-//void mstsc_connect(CString ip, CString port, CString username, CString password, int seconds)
-//{
-//	CString data = _T("what");
-//	CString title = _T("Remote Desktop Connection");
-//
-//	HWND hWnd = ::FindWindow(_T("#32770"), title);
-//	HWND hChildComboBoxEx32 = ::FindWindowEx(hWnd, NULL, _T("ComboBoxEx32"), NULL);
-//	HWND hChildComboBox = ::FindWindowEx(hChildComboBoxEx32, NULL, _T("ComboBox"), NULL);
-//	HWND hChildEdit = ::FindWindowEx(hChildComboBox, NULL, _T("Edit"), NULL);
-//	//HWND hChildPassword = ::FindWindowEx(hWnd, hChildUsername, _T("Edit"), _T(""));
-//	//HWND hChildOK = ::FindWindowEx(hWnd, hChildUsername, _T("Button"), _T("OK"));
-//	HWND hChildConnect = ::FindWindowEx(hWnd, hChildComboBoxEx32, _T("Button"), _T("Co&nnect"));
-//
-//	fill_text(hChildEdit, data);
-//	Sleep(500);
-//	click_button(hChildConnect);
-//}
