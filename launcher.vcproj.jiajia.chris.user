@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory=""
-				CommandArguments="wbr://type=0&amp;progname=radmin.exe&amp;ip=219.216.101.53&amp;username=123456&amp;password=123456"
+				CommandArguments="wbr://type=1&amp;progname=mstsc.exe&amp;ip=219.216.101.53&amp;username=Administrator&amp;password=liuyanji"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"
@@ -39,7 +39,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory=""
-				CommandArguments="wbr://type=0&amp;progname=radmin.exe&amp;ip=219.216.101.53&amp;username=123456&amp;password=123456"
+				CommandArguments="wbr://type=2&amp;progname=ttvnc.exe&amp;code=889911"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

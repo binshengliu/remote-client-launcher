@@ -73,8 +73,8 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			break;
 		case MSTSC_NO_CH:
 			mstsc_construct_command(parameters, cmd);
-			mstsc_resolve_connect_info(parameters, ip);
-			mstsc_connect(cmd, ip);
+			mstsc_resolve_connect_info(parameters, ip, username, password);
+			mstsc_connect(cmd, ip, username, password);
 			break;
 		case TTVNC_NO_CH:
 			ttvnc_construct_command(parameters, cmd);
