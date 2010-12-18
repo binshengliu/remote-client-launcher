@@ -96,33 +96,33 @@ bool mstsc_connect( CString cmd, CString ip, CString username, CString password,
 	return true;
 	//连接成功，输入密码，并登陆。键盘事件的模拟
 	//都只有一个子窗口，所以找到的唯一一个就是所需的子窗口
-	HWND h_sub1 = FindWindowEx(h_wnd, NULL, _T("TscShellAxHostClass"), NULL);
-	HWND h_sub2 = FindWindowEx(h_sub1, NULL, NULL, NULL);
-	HWND h_sub3 = FindWindowEx(h_sub2, NULL, _T("UIMainClass"), NULL);
-	HWND h_sub4 = FindWindowEx(h_sub3, NULL, _T("UIContainerClass"), NULL);
-	HWND h_input = FindWindowEx(h_sub4, NULL, _T("IHWindowClass"), NULL);
-	Sleep(1000);
-	while (!IsWindowVisible(h_wnd));
-	::ShowWindow(h_wnd, SW_RESTORE);  
-	::SetForegroundWindow(h_wnd);
-	for (int i = 0; i < password.GetLength(); ++i) {
-		TCHAR ch = password.GetAt(i);
-		SHORT comb = VkKeyScan(ch);
-		BYTE vk = comb & 0xFF;
-		bool shift = (comb & 0x0100) == 0x0100 ? true : false;
-		//char key_ch = ch;
-		if (shift) {
-			keybd_event(VK_SHIFT, MapVirtualKey(VK_SHIFT, MAPVK_VK_TO_VSC), 0, 0);
-		}
-		keybd_event(vk, MapVirtualKey(vk, MAPVK_VK_TO_VSC), 0, 0);
-		keybd_event(vk, MapVirtualKey(vk, MAPVK_VK_TO_VSC), KEYEVENTF_KEYUP, 0);
-		if (shift) {
-			keybd_event(VK_SHIFT, MapVirtualKey(VK_SHIFT, MAPVK_VK_TO_VSC), KEYEVENTF_KEYUP, 0);
-		}
-	}
-	keybd_event(VK_RETURN, MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC), 0, 0);
-	keybd_event(VK_RETURN, MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC), KEYEVENTF_KEYUP, 0);
-	return true;
+	//HWND h_sub1 = FindWindowEx(h_wnd, NULL, _T("TscShellAxHostClass"), NULL);
+	//HWND h_sub2 = FindWindowEx(h_sub1, NULL, NULL, NULL);
+	//HWND h_sub3 = FindWindowEx(h_sub2, NULL, _T("UIMainClass"), NULL);
+	//HWND h_sub4 = FindWindowEx(h_sub3, NULL, _T("UIContainerClass"), NULL);
+	//HWND h_input = FindWindowEx(h_sub4, NULL, _T("IHWindowClass"), NULL);
+	//Sleep(1000);
+	//while (!IsWindowVisible(h_wnd));
+	//::ShowWindow(h_wnd, SW_RESTORE);  
+	//::SetForegroundWindow(h_wnd);
+	//for (int i = 0; i < password.GetLength(); ++i) {
+	//	TCHAR ch = password.GetAt(i);
+	//	SHORT comb = VkKeyScan(ch);
+	//	BYTE vk = comb & 0xFF;
+	//	bool shift = (comb & 0x0100) == 0x0100 ? true : false;
+	//	//char key_ch = ch;
+	//	if (shift) {
+	//		keybd_event(VK_SHIFT, MapVirtualKey(VK_SHIFT, MAPVK_VK_TO_VSC), 0, 0);
+	//	}
+	//	keybd_event(vk, MapVirtualKey(vk, MAPVK_VK_TO_VSC), 0, 0);
+	//	keybd_event(vk, MapVirtualKey(vk, MAPVK_VK_TO_VSC), KEYEVENTF_KEYUP, 0);
+	//	if (shift) {
+	//		keybd_event(VK_SHIFT, MapVirtualKey(VK_SHIFT, MAPVK_VK_TO_VSC), KEYEVENTF_KEYUP, 0);
+	//	}
+	//}
+	//keybd_event(VK_RETURN, MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC), 0, 0);
+	//keybd_event(VK_RETURN, MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC), KEYEVENTF_KEYUP, 0);
+	//return true;
 }
 
 bool mstsc_find_main_window( int seconds, HWND &h_main )
