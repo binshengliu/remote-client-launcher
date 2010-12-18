@@ -7,6 +7,7 @@
 #include "teamviewer.h"
 #include "ttvnc.h"
 #include "mstsc.h"
+#include "remotelyanywhere.h"
 #include "common.h"
 #include <iostream>
 #include <string.h>
@@ -48,6 +49,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		CString id, teamviewer_assistant_type;
 		CString code, ttvnc_assistant_mode;
 		CString cmd;
+		CString rmtaw_url;
 		
 		int begin_pos = CString(PREFIX_STRING).GetLength();
 		CString url = argv[1];
@@ -86,7 +88,10 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 			teamviewer_resolve_connect_info(parameters, id, password, teamviewer_assistant_type);
 			teamviewer_connect(cmd, id, password, TEAMVIEWER_CONNECT_RETRY);
 			break;
-		case TEXT('4'):
+		case RMTAW_NO_CH:
+			rmtaw_construct_url(parameters, rmtaw_url);
+			rmtaw_resolve_connect_info(parameters, username, password);
+			rmtaw_connect(rmtaw_url, username, password, RMTAW_CONNECT_RETRY);
 			break;
 		}
 #ifdef _DEBUG
