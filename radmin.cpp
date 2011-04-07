@@ -5,6 +5,8 @@
 #include "timer.h"
 #include <stdio.h>
 bool radmin_finding;
+//根据解析完的参数，构造命令行，如下
+//"Radmin.exe /connect:219.216.101.200"
 bool radmin_construct_command(const CMapStringToString &parameters, CString &cmd)
 {
 	CString progname, ip, port, username, password;
@@ -27,6 +29,7 @@ bool radmin_construct_command(const CMapStringToString &parameters, CString &cmd
 	return true;
 }
 
+//解析登录信息，即ip，用户名，密码
 bool radmin_resolve_login_info( const CMapStringToString &parameters, CString &ip, CString &username, CString &password )
 {
 	if (!parameters.Lookup(IP_STRING, ip))
@@ -37,6 +40,8 @@ bool radmin_resolve_login_info( const CMapStringToString &parameters, CString &i
 	return true;
 }
 
+//根据窗口名，查找radmin窗口
+//设置超时等待，如果超时，则返回false
 bool radmin_find_window(CString ip, int seconds, HWND &h_wnd, bool &zh)
 {
 	bool found = false;
@@ -79,6 +84,9 @@ bool radmin_find_window(CString ip, int seconds, HWND &h_wnd, bool &zh)
 	h_wnd = wnd;
 	return found;
 }
+
+//主要的登录动作
+//首先创建进程，然后查找主窗口，然后查找用户名和密码输入框，如果没有用户名输入框，则只输密码
 bool radmin_login(CString cmd, CString ip, CString username, CString password, int seconds)
 {
 	if (!create_process(cmd))
@@ -122,6 +130,7 @@ bool radmin_login(CString cmd, CString ip, CString username, CString password, i
 	return true;
 }
 
+//超时定时器，如果超时，则让线程退出
 VOID CALLBACK radmin_timer_proc( HWND hwnd, UINT u_msg, UINT_PTR id_event, DWORD dw_time )
 {
 #ifdef _DEBUG

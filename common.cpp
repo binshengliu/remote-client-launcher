@@ -21,6 +21,7 @@ void test()
 }
 
 //name&ip=219.216.101.53&port=&username=123456&password=123456
+//将传递进来的参数进行解析，存放到Map中
 void process_parameters( CString str, int start, CMapStringToString &parameters )
 {
 	int pos = start;
