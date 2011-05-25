@@ -178,6 +178,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DESDecryption.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\launcher.cpp"
 				>
 			</File>
@@ -237,6 +241,10 @@
 			>
 			<File
 				RelativePath=".\common.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DESDecryption.h"
 				>
 			</File>
 			<File

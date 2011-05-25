@@ -1,0 +1,1 @@
+bool DecryptText(const BYTE *key, BYTE *text, DWORD *length);
