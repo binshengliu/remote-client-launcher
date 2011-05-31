@@ -1,6 +1,7 @@
 #pragma once
 #define PREFIX_STRING TEXT("wbr://")
 #define TYPE_STRING TEXT("type")
+#define TIME_STRING TEXT("time")
 #define PROGNAME_STRING TEXT("progname")
 #define IP_STRING TEXT("ip")
 #define PORT_STRING TEXT("port")
@@ -18,4 +19,5 @@ void process_parameters(CString str, int start, CMapStringToString &parameters);
 bool create_process(CString cmd);
 bool fill_text(HWND h_edit, CString text);
 bool click_button(HWND h_button);
+bool is_time_valid(time_t time);
 extern DWORD thread_id;

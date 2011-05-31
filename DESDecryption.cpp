@@ -6,7 +6,7 @@
 
 // Link with the Advapi32.lib file.
 #pragma comment (lib, "advapi32")
-bool DecryptText(const BYTE *key, BYTE *text, DWORD *length)
+bool des_decrypt(const BYTE *key, BYTE *text, DWORD *length)
 { 
 	bool fReturn = false;
 
@@ -94,7 +94,7 @@ Exit_MyDecryptFile:
 	return fReturn;
 }
 
-void StrToByte( DWORD _dwLen, LPSTR _pStr, LPBYTE _pByte)
+void str2byte( DWORD _dwLen, LPSTR _pStr, LPBYTE _pByte)
 {
 	char pTmp[3] = {0};
 

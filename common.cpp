@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "common.h"
 #include "radmin.h"
+#define EXPIRE 180
 bool find_window( CString title, int retry, HWND &h_wnd )
 {
 	HWND wnd = 0;
@@ -128,4 +129,13 @@ bool fill_text( HWND h_edit, CString text )
 		text.ReleaseBuffer();
 	}
 	return result;
+}
+
+bool is_time_valid( time_t time )
+{
+	CTime tim = CTime::GetCurrentTime();
+	if (tim.GetTime() - time > EXPIRE) {
+		return false;
+	}
+	return true;
 }

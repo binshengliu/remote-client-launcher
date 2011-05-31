@@ -18,11 +18,12 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 
+#define KEY "oaycjmf3"
 
 // The one and only application object
 
 CWinApp theApp;
-void StrToByte( DWORD _dwLen, LPSTR _pStr, LPBYTE _pByte);
+void str2byte( DWORD _dwLen, LPSTR _pStr, LPBYTE _pByte);
 
 CMapStringToString parameters;
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
@@ -55,17 +56,20 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		char *tc = 0;
 #ifdef UNICODE
 		bytes /= 2;
-		tc = new char[bytes];
+		tc = new char[bytes + 1];
 		wcstombs_s(0, tc, bytes + 1, t, bytes * 2);
 #endif
 		DWORD content_len = bytes / 2;
 		BYTE *buf = new BYTE[content_len];
-		StrToByte(bytes, tc, buf);
-		const BYTE key[] = "oaycjmf3";
-		if (DecryptText(key, buf, &content_len))
+		str2byte(bytes, tc, buf);
+		const BYTE key[] = KEY;
+		if (des_decrypt(key, buf, &content_len))
 			buf[content_len] = '\0';
 		else
 			return 1;
+#ifdef DEBUG
+		printf("%s\n", buf);
+#endif
 		CString ip, port, username, password;
 		CString id, teamviewer_assistant_type;
 		CString code, ttvnc_assistant_mode;
@@ -73,12 +77,27 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		CString rmtaw_url;
 		
 		CString url(buf);
+		delete [] buf;
+		delete [] tc;
 		if (url[url.GetLength() - 1] == '/')
 		{
 			url = url.Left(url.GetLength() - 1);
 		}
 
 		process_parameters(url, 0, parameters);
+
+		CString str_time;
+		if (parameters.Lookup(TIME_STRING, str_time)) {
+			time_t tim = _tstol(str_time);
+			if (!is_time_valid(tim)) {
+				AfxMessageBox(_T("链接已失效"));
+				return -1;
+			}
+		} else {
+			AfxMessageBox(_T("无法验证时间"));
+			return -1;
+		}
+
 		CString str_type;
 		TCHAR type = 0;
 		if (parameters.Lookup(TYPE_STRING, str_type))

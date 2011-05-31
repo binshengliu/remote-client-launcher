@@ -1,1 +1,1 @@
-bool DecryptText(const BYTE *key, BYTE *text, DWORD *length);
+bool des_decrypt(const BYTE *key, BYTE *text, DWORD *length);
